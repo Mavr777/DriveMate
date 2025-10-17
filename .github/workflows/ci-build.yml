@@ -56,7 +56,7 @@ jobs:
         run: echo "${{ secrets.GHCR_TOKENN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build image
-        run: docker build -t $REGISTRY/${{ steps.repo.outputs.repo_lower }}:${{ steps.meta.outputs.TAG }} ./taskflow .
+        run: docker build -t $REGISTRY/${{ steps.repo.outputs.repo_lower }}:${{ steps.meta.outputs.TAG }} ./taskflow 
 
       - name: Push image
         run: docker push $REGISTRY/${{ steps.repo.outputs.repo_lower }}:${{ steps.meta.outputs.TAG }}
