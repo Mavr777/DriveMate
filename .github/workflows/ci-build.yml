@@ -27,9 +27,11 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
+        working-directory: ./taskflow
         run: npm ci
 
       - name: Build Angular by branch
+        working-directory: ./taskflow
         run: |
           if [ "${{ github.ref_name }}" = "dev" ]; then npm run build -- --configuration=development; fi
           if [ "${{ github.ref_name }}" = "test" ]; then npm run build -- --configuration=production; fi
@@ -54,7 +56,7 @@ jobs:
         run: echo "${{ secrets.GHCR_TOKENN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build image
-        run: docker build -t $REGISTRY/${{ steps.repo.outputs.repo_lower }}:${{ steps.meta.outputs.TAG }} .
+        run: docker build -t $REGISTRY/${{ steps.repo.outputs.repo_lower }}:${{ steps.meta.outputs.TAG }} ./taskflow .
 
       - name: Push image
         run: docker push $REGISTRY/${{ steps.repo.outputs.repo_lower }}:${{ steps.meta.outputs.TAG }}
