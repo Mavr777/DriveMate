@@ -1,0 +1,10 @@
+<h2>Dashboard</h2>
+<p>Welcome to Taskflow! testing the docker</p>
+
+<input [(ngModel)]="note" placeholder="Add a quick note" />
+<button (click)="addNote()">Save</button>
+<button (click)="saveNotes()">add</button>
+<!-- testing the diff envs for github,del it later . -->
+<ul>
+  <li *ngFor="let item of notes">{{ item }}</li>
+</ul>

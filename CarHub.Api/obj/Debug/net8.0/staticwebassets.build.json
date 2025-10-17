@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "T972J4ne4ZTzQtTvvUWy8RIqsdMGvPHVR8/tgCmuNh0=",
+  "Source": "CarHub.Api",
+  "BasePath": "_content/CarHub.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
