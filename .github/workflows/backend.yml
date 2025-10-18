@@ -1,0 +1,62 @@
+name: Build and Push .NET Backend Docker Image
+
+on:
+  push:
+    branches:
+      - '**'  # Runs on all branches (main, dev, test, feature/*)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}-backend
+      DOCKER_BUILDKIT: 1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        working-directory: ./CarHub.Api
+        run: dotnet restore
+
+      - name: Build project
+        working-directory: ./CarHub.Api
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish project
+        working-directory: ./CarHub.Api
+        run: dotnet publish -c Release -o out
+
+      - name: Convert repo name to lowercase
+        id: repo
+        run: echo "repo_lower=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Set tag by branch
+        id: meta
+        run: |
+          if [ "${{ github.ref_name }}" = "dev" ]; then echo "TAG=dev-${GITHUB_SHA}" >> $GITHUB_OUTPUT; fi
+          if [ "${{ github.ref_name }}" = "test" ]; then echo "TAG=test-${GITHUB_SHA}" >> $GITHUB_OUTPUT; fi
+          if [ "${{ github.ref_name }}" = "main" ]; then echo "TAG=prod-${GITHUB_SHA}" >> $GITHUB_OUTPUT; fi
+          if [ -z "${TAG}" ]; then echo "TAG=${{ github.ref_name }}-${GITHUB_SHA}" >> $GITHUB_OUTPUT; fi
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GHCR_TOKENN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t $REGISTRY/${{ steps.repo.outputs.repo_lower }}:${{ steps.meta.outputs.TAG }} ./CarHub.Api
+
+      - name: Push Docker image
+        run: docker push $REGISTRY/${{ steps.repo.outputs.repo_lower }}:${{ steps.meta.outputs.TAG }}
+
+      - name: Also tag latest for main
+        if: github.ref_name == 'main'
+        run: |
+          docker tag $REGISTRY/${{ steps.repo.outputs.repo_lower }}:${{ steps.meta.outputs.TAG }} $REGISTRY/${{ steps.repo.outputs.repo_lower }}:latest
+          docker push $REGISTRY/${{ steps.repo.outputs.repo_lower }}:latest
