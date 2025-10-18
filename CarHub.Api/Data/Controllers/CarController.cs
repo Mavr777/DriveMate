@@ -16,7 +16,7 @@ namespace CarHub.Api.Controllers
             _context = context;
         }
 
-        // GET: api/cars
+        // GET: api/cars 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Car>>> GetCars()
         {
